@@ -135,10 +135,19 @@ export const Viewer3D = () => {
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {currentFloorPlan 
-              ? `Exploring: ${currentFloorPlan.name}` 
+              ? `Exploring: ${currentFloorPlan.name} (${currentFloorPlan.rooms.length} rooms, ${currentFloorPlan.walls.length} walls)` 
               : "Upload a floor plan above to generate your 3D model"
             }
           </p>
+          {currentFloorPlan && (
+            <div className="mt-4 flex justify-center">
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground bg-accent/20 px-4 py-2 rounded-lg">
+                <span>Scale: 1:{Math.round(currentFloorPlan.scale)} pixels/meter</span>
+                <span>•</span>
+                <span>Generated from: {currentFloorPlan.name}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <Card className="architectural-elevation overflow-hidden">
