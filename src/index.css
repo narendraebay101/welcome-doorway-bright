@@ -147,7 +147,7 @@ All colors MUST be HSL.
   }
   
   .animate-bounce-in {
-    animation: bounceIn 1s var(--transition-bounce) forwards;
+    animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
   }
 }
 
