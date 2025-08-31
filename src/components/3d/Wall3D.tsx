@@ -22,7 +22,12 @@ export const Wall3D = ({ wall, scale, offset }: Props) => {
   return (
     <mesh position={[centerX, actualHeight / 2, centerZ]} rotation={[0, angle, 0]} castShadow receiveShadow>
       <boxGeometry args={[actualLength, actualHeight, actualThickness]} />
-      <meshStandardMaterial color="hsl(210, 40%, 92%)" roughness={0.8} metalness={0.1} />
+      <meshStandardMaterial 
+        color="hsl(210, 15%, 88%)" 
+        roughness={0.9} 
+        metalness={0.05}
+        normalScale={new THREE.Vector2(0.3, 0.3)}
+      />
     </mesh>
   );
 };

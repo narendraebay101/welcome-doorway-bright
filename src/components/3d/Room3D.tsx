@@ -22,16 +22,42 @@ export const Room3D = ({ room, scale, offset }: Props) => {
 
   return (
     <>
-      {/* Floor */}
+      {/* Enhanced Floor with better materials */}
       <mesh position={[x, -0.01, z]} receiveShadow>
         <boxGeometry args={[width, 0.02, depth]} />
-        <meshStandardMaterial color={roomColor} transparent opacity={0.85} roughness={0.9} />
+        <meshStandardMaterial 
+          color={roomColor} 
+          transparent 
+          opacity={0.9} 
+          roughness={0.7}
+          metalness={0.1}
+        />
       </mesh>
 
-      {/* Room outline */}
+      {/* Room border with gradient effect */}
       <mesh position={[x, 0.005, z]}>
-        <ringGeometry args={[Math.min(width, depth) * 0.4, Math.min(width, depth) * 0.45, 32]} />
-        <meshStandardMaterial color="hsl(215, 20%, 65%)" transparent opacity={0.3} side={THREE.DoubleSide} />
+        <ringGeometry args={[Math.min(width, depth) * 0.42, Math.min(width, depth) * 0.47, 32]} />
+        <meshStandardMaterial 
+          color="hsl(215, 25%, 70%)" 
+          transparent 
+          opacity={0.4} 
+          side={THREE.DoubleSide}
+          roughness={0.5}
+          metalness={0.2}
+        />
+      </mesh>
+
+      {/* Subtle inner glow */}
+      <mesh position={[x, 0.008, z]}>
+        <ringGeometry args={[Math.min(width, depth) * 0.35, Math.min(width, depth) * 0.4, 32]} />
+        <meshStandardMaterial 
+          color={roomColor}
+          transparent 
+          opacity={0.2} 
+          side={THREE.DoubleSide}
+          emissive={roomColor}
+          emissiveIntensity={0.1}
+        />
       </mesh>
 
       {/* Room label */}

@@ -13,8 +13,10 @@ export const Generated3DModel = () => {
 
   useFrame((state) => {
     if (groupRef.current) {
-      // Subtle breathing animation
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+      // Subtle floating animation for the entire model
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.02;
+      // Very subtle rotation
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.005;
     }
   });
 
@@ -55,27 +57,54 @@ export const Generated3DModel = () => {
         <Room3D key={room.id} room={room} scale={currentFloorPlan.scale} offset={offset} />
       ))}
 
-      {/* Floor plan title */}
+      {/* Floor plan title with better styling */}
       <Text
-        position={[0, 4, 0]}
-        fontSize={0.4}
-        color="#64748b"
+        position={[0, 4.5, 0]}
+        fontSize={0.5}
+        color="hsl(215, 25%, 27%)"
         anchorX="center"
         anchorY="middle"
+        outlineWidth={0.01}
+        outlineColor="hsl(0, 0%, 100%)"
       >
         {currentFloorPlan.name}
       </Text>
       
-      {/* Info text showing room and wall count */}
+      {/* Enhanced info text */}
       <Text
-        position={[0, 3.2, 0]}
-        fontSize={0.25}
-        color="#94a3b8"
+        position={[0, 3.8, 0]}
+        fontSize={0.3}
+        color="hsl(215, 15%, 45%)"
         anchorX="center"
         anchorY="middle"
+        outlineWidth={0.005}
+        outlineColor="hsl(0, 0%, 95%)"
       >
         {currentFloorPlan.rooms.length} rooms • {currentFloorPlan.walls.length} walls
       </Text>
+
+      {/* Subtle ambient particles for atmosphere */}
+      <group>
+        {Array.from({ length: 8 }, (_, i) => (
+          <mesh
+            key={i}
+            position={[
+              (Math.random() - 0.5) * 20,
+              Math.random() * 6 + 2,
+              (Math.random() - 0.5) * 20
+            ]}
+          >
+            <sphereGeometry args={[0.02, 8, 8]} />
+            <meshStandardMaterial
+              color="hsl(45, 100%, 70%)"
+              transparent
+              opacity={0.6}
+              emissive="hsl(45, 100%, 50%)"
+              emissiveIntensity={0.2}
+            />
+          </mesh>
+        ))}
+      </group>
     </group>
   );
 };
