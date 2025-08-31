@@ -42,7 +42,6 @@ export const Room3D = ({ room, scale, offset }: Props) => {
         anchorX="center"
         anchorY="middle"
         rotation={[-Math.PI / 2, 0, 0]}
-        font="/fonts/inter-medium.woff"
       >
         {room.name}
       </Text>

@@ -1,6 +1,6 @@
 import { Suspense, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, Grid, Environment } from "@react-three/drei";
+import { OrbitControls, PerspectiveCamera, Grid, Environment, ContactShadows } from "@react-three/drei";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, ZoomIn, ZoomOut, Maximize } from "lucide-react";
@@ -86,18 +86,20 @@ const Scene = () => {
       />
       
       {/* Lighting */}
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.5} />
+      <hemisphereLight args={[0xffffff, 0x444444, 0.3]} />
       <directionalLight 
-        position={[10, 10, 5]} 
+        position={[10, 12, 8]} 
         intensity={1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-far={50}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={20}
-        shadow-camera-bottom={-20}
+        shadow-camera-far={60}
+        shadow-camera-left={-25}
+        shadow-camera-right={25}
+        shadow-camera-top={25}
+        shadow-camera-bottom={-25}
+        shadow-bias={-0.0005}
       />
       
       {/* Environment */}
@@ -119,6 +121,9 @@ const Scene = () => {
       
       {/* Generated 3D Model */}
       <Generated3DModel />
+
+      {/* Soft ground contact shadows for realism */}
+      <ContactShadows position={[0, -0.01, 0]} opacity={0.4} scale={20} blur={2} far={10} resolution={1024} color="#000000" />
     </>
   );
 };
