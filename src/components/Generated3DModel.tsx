@@ -3,6 +3,9 @@ import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useFloorPlan } from '@/contexts/FloorPlanContext';
+import { Wall3D } from './3d/Wall3D';
+import { Room3D } from './3d/Room3D';
+import { DefaultHouse as DefaultHouse3D } from './3d/DefaultHouse';
 
 export const Generated3DModel = () => {
   const { currentFloorPlan } = useFloorPlan();
@@ -17,22 +20,41 @@ export const Generated3DModel = () => {
 
   console.log('Generated3DModel render - currentFloorPlan:', currentFloorPlan);
 
+  const offset = React.useMemo(() => {
+    if (!currentFloorPlan) return { x: 0, z: 0 };
+    const wallPoints = currentFloorPlan.walls.flatMap((w: any) => [w.start, w.end]);
+    const roomPoints = currentFloorPlan.rooms.flatMap((r: any) => [
+      { x: r.bounds.x, y: r.bounds.y },
+      { x: r.bounds.x + r.bounds.width, y: r.bounds.y + r.bounds.height },
+    ]);
+    const all = [...wallPoints, ...roomPoints];
+    if (all.length === 0) return { x: 0, z: 0 };
+    const minX = Math.min(...all.map(p => p.x));
+    const maxX = Math.max(...all.map(p => p.x));
+    const minY = Math.min(...all.map(p => p.y));
+    const maxY = Math.max(...all.map(p => p.y));
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const s = currentFloorPlan.scale || 1;
+    return { x: centerX / s, z: centerY / s };
+  }, [currentFloorPlan]);
+  
   if (!currentFloorPlan) {
-    return <DefaultHouse />;
+    return <DefaultHouse3D />;
   }
 
   return (
     <group ref={groupRef}>
       {/* Generate walls from floor plan data */}
       {currentFloorPlan.walls.map((wall) => (
-        <Wall3D key={wall.id} wall={wall} scale={currentFloorPlan.scale} />
+        <Wall3D key={wall.id} wall={wall} scale={currentFloorPlan.scale} offset={offset} />
       ))}
-      
+
       {/* Generate floors for each room */}
       {currentFloorPlan.rooms.map((room) => (
-        <Room3D key={room.id} room={room} scale={currentFloorPlan.scale} />
+        <Room3D key={room.id} room={room} scale={currentFloorPlan.scale} offset={offset} />
       ))}
-      
+
       {/* Floor plan title */}
       <Text
         position={[0, 4, 0]}
@@ -58,116 +80,9 @@ export const Generated3DModel = () => {
   );
 };
 
-const Wall3D = ({ wall, scale }: { wall: any; scale: number }) => {
-  // Convert 2D coordinates to 3D world coordinates with proper centering
-  const centerOffsetX = 0; // Remove arbitrary offset
-  const centerOffsetZ = 0;
-  
-  const startX = wall.start.x / scale - centerOffsetX;
-  const startZ = wall.start.y / scale - centerOffsetZ;
-  const endX = wall.end.x / scale - centerOffsetX;
-  const endZ = wall.end.y / scale - centerOffsetZ;
-  
-  // Calculate wall dimensions
-  const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endZ - startZ, 2));
-  const angle = Math.atan2(endZ - startZ, endX - startX);
-  
-  // Position at center of wall
-  const centerX = (startX + endX) / 2;
-  const centerZ = (startZ + endZ) / 2;
-  
-  // Ensure minimum visible dimensions
-  const actualLength = Math.max(length, 0.1);
-  const actualHeight = Math.max(wall.height, 0.1);
-  const actualThickness = Math.max(wall.thickness, 0.05);
-  
-  return (
-    <mesh 
-      position={[centerX, actualHeight / 2, centerZ]}
-      rotation={[0, angle, 0]}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[actualLength, actualHeight, actualThickness]} />
-      <meshStandardMaterial 
-        color="#e2e8f0" 
-        roughness={0.8}
-        metalness={0.1}
-      />
-    </mesh>
-  );
-};
+// Moved Wall3D to a dedicated component at src/components/3d/Wall3D.tsx
 
-const Room3D = ({ room, scale }: { room: any; scale: number }) => {
-  // Convert room bounds to 3D coordinates with proper centering
-  const x = (room.bounds.x + room.bounds.width / 2) / scale;
-  const z = (room.bounds.y + room.bounds.height / 2) / scale;
-  const width = Math.max(room.bounds.width / scale, 0.5);
-  const depth = Math.max(room.bounds.height / scale, 0.5);
-  
-  // Room type colors with better contrast
-  const roomColors = {
-    living: '#dbeafe',    // Blue tint
-    bedroom: '#fce7f3',   // Pink tint
-    kitchen: '#dcfce7',   // Green tint
-    bathroom: '#fef3c7',  // Yellow tint
-    hallway: '#f3f4f6',   // Gray tint
-    other: '#f1f5f9'      // Light gray
-  };
-  
-  const roomColor = roomColors[room.type] || roomColors.other;
-  
-  return (
-    <>
-      {/* Floor */}
-      <mesh position={[x, -0.01, z]} receiveShadow>
-        <boxGeometry args={[width, 0.02, depth]} />
-        <meshStandardMaterial 
-          color={roomColor}
-          transparent
-          opacity={0.8}
-          roughness={0.9}
-        />
-      </mesh>
-      
-      {/* Room outline */}
-      <mesh position={[x, 0.005, z]}>
-        <ringGeometry args={[Math.min(width, depth) * 0.4, Math.min(width, depth) * 0.45, 32]} />
-        <meshStandardMaterial 
-          color="#64748b"
-          transparent
-          opacity={0.3}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      
-      {/* Room label */}
-      <Text
-        position={[x, 0.1, z]}
-        fontSize={Math.min(width, depth) * 0.15}
-        color="#374151"
-        anchorX="center"
-        anchorY="middle"
-        rotation={[-Math.PI / 2, 0, 0]}
-        font="/fonts/inter-medium.woff"
-      >
-        {room.name}
-      </Text>
-      
-      {/* Room type indicator */}
-      <Text
-        position={[x, 0.08, z + Math.min(width, depth) * 0.15]}
-        fontSize={Math.min(width, depth) * 0.08}
-        color="#6b7280"
-        anchorX="center"
-        anchorY="middle"
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        {room.type}
-      </Text>
-    </>
-  );
-};
+// Moved Room3D to a dedicated component at src/components/3d/Room3D.tsx
 
 // Fallback default house when no floor plan is generated
 const DefaultHouse = () => {
